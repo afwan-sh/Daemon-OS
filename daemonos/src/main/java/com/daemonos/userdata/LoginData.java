@@ -1,20 +1,32 @@
 package com.daemonos.userdata;
 
 import java.util.HashMap;
+import com.daemonos.terminalEmulator.Emulator;
 
 public class LoginData {
     HashMap<String, String> user = new HashMap<String, String>();
 
-    public String checkData() {
+    public String checkData() throws Exception {
+        Emulator ui = new Emulator("admin");
         if (user.isEmpty()) {
-            IO.println("Hello new user let make your account");
-            String name = IO.readln("Enter your name");
-            String pass = IO.readln("Enter your password");
+            ui.msg("Hello new user let make your account");
+            String name = ui.input("Enter your name");
+            String pass = ui.password("Enter your password");
             setUser(name, pass);
-            return "";
+            return "User Add Successfully";
         } else {
-            String name = IO.readln("Enter your user name");
-            return getUser(name);
+
+            String name = ui.input("Enter your user name");
+            if (user.containsKey(name)) {
+                String pass = ui.password("Enter your password");
+                if (pass.equals(getUser(name))) {
+                    return "Welcome user";
+                } else {
+                    return "Wrong password";
+                }
+            } else {
+                return "Wrong User name";
+            }
         }
     }
 
