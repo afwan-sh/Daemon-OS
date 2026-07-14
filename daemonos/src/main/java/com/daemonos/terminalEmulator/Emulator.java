@@ -7,40 +7,29 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import java.awt.Font;
 
+// symbol to use ¶‼∫␦█▓
 public class Emulator {
     String user;
     Screen screen;
     int x = 0;
     int y = 0;
-    TextColor bg = TextColor.ANSI.BLACK;
-    TextColor fg = TextColor.ANSI.GREEN;
-
-    public Emulator(String user) throws Exception {
-        this.user = user;
-    }
-
-    public String input(String word) {
-        return IO.readln(user + "¡" + word + " « ");
-    }
-
-    public String password(String word) {
-        return IO.readln(user + "¡" + word + " « ");
-    }
-
-    public void msg(String word) {
-        IO.println("» " + word);
-    }
+    int minY;
+    TextColor black = TextColor.ANSI.BLACK;
+    TextColor green = TextColor.ANSI.GREEN;
 
     public void openWindow() {
         try {
+            Font font = new Font("Cascadia Mono", Font.PLAIN, 14);
             DefaultTerminalFactory factory = new DefaultTerminalFactory();
+            factory.setTerminalEmulatorFontConfiguration(SwingTerminalFontConfiguration.newInstance(font));
             SwingTerminalFrame terminalFrame = factory.createSwingTerminal();
-            terminalFrame.setBackgroundColor(TextColor.ANSI.BLACK);
-            terminalFrame.setForegroundColor(TextColor.ANSI.GREEN);
+            screen = new TerminalScreen(terminalFrame);
             terminalFrame.setTitle("DaemonOS");
             screen = new TerminalScreen(terminalFrame);
             screen.startScreen();
@@ -61,50 +50,104 @@ public class Emulator {
 
     public void print(String word) throws IOException {
         for (int x = 0; x < word.length(); x++) {
-            screen.setCharacter(x, y, new TextCharacter(word.charAt(x), fg, bg));
+            screen.setCharacter(x + 1, y, new TextCharacter(word.charAt(x), green, black));
         }
-        y++;
         screen.setCursorPosition(new TerminalPosition(x, y));
         screen.refresh();
     }
 
-    public String input() throws IOException {
+    public void msg(String word) throws IOException {
+        screen.setCharacter(x, y, new TextCharacter('»', green, black));
+        print(word);
+        y++;
+        x = 0;
+        screen.setCursorPosition(new TerminalPosition(x, y));
+        screen.refresh();
+    }
+
+    public String input(boolean multiLine, boolean isPassword, String prompt) throws IOException {
+        screen.setCharacter(x, y, new TextCharacter('«', green, black));
+        print(prompt + " :");
         StringBuilder str = new StringBuilder();
+        int minX = x = prompt.length() + 3;
+        minY = y;
+        screen.setCursorPosition(new TerminalPosition(minX, minY));
+        screen.refresh();
         while (true) {
             KeyStroke st = screen.readInput();
-            IO.println(st);
             if (st.getKeyType() == KeyType.Enter) {
-                if (st.isShiftDown()) {
-                    break;
+                if (multiLine) {
+                    if (st.isShiftDown()) {
+                        y++;
+                        x = 0;
+                        break;
+                    } else {
+                        y++;
+                        x = 0;
+                        screen.setCharacter(x, y, new TextCharacter('«', green, black));
+                        x++;
+                        str.append(st.getCharacter());
+                        screen.setCursorPosition(new TerminalPosition(x, y));
+                        screen.refresh();
+                    }
                 } else {
                     y++;
                     x = 0;
-                    screen.setCursorPosition(new TerminalPosition(x, y));
-                    screen.refresh();
+                    break;
                 }
+
             } else if (st.getKeyType() == KeyType.Character) {
                 char c = st.getCharacter();
-                screen.setCharacter(x, y, new TextCharacter(st.getCharacter(), fg, bg));
+                if (isPassword) {
+                    multiLine = false;
+                    screen.setCharacter(x, y, new TextCharacter('*', green, black));
+                } else {
+                    screen.setCharacter(x, y, new TextCharacter(st.getCharacter(), green, black));
+                }
                 x++;
                 screen.setCursorPosition(new TerminalPosition(x, y));
                 str.append(c);
                 screen.refresh();
             } else if (st.getKeyType() == KeyType.Backspace) {
-                if (x > 0) {
-                    x--;
-                    str.deleteCharAt(str.length() - 1);
-                    screen.setCharacter(x, y, new TextCharacter(' ', fg, bg));
-                    screen.setCursorPosition(new TerminalPosition(x, y));
-                    screen.refresh();
-                } else if (x == 0 && y > 0) {
-                    x = str.length();
-                    IO.println(x);
-                    y--;
-                    screen.setCursorPosition(new TerminalPosition(x, y));
-                    screen.refresh();
+                if (x > 1) {
+                    if (minX < x || minY < y) {
+                        x--;
+                        str.deleteCharAt(str.length() - 1);
+                        screen.setCharacter(x, y, new TextCharacter(' ', green, black));
+                        screen.setCursorPosition(new TerminalPosition(x, y));
+                        screen.refresh();
+                    }
+                } else if (x == 1 && y > 0) {
+                    if (minY < y) {
+                        screen.setCharacter(0, y, new TextCharacter(' ', green, black));
+                        y--;
+                        str.deleteCharAt(str.length() - 1);
+                        x = getStringLine(screen, y).length();
+                        screen.setCursorPosition(new TerminalPosition(x, y));
+                        screen.refresh();
+                    }
                 }
             }
         }
         return str.toString();
+    }
+
+    public static String getStringLine(Screen screen, int row) {
+        StringBuilder str = new StringBuilder();
+        int screenW = screen.getTerminalSize().getColumns();
+        for (int x = 0; x < screenW; x++) {
+            TextCharacter tc = screen.getBackCharacter(x, row);
+            if (tc != null) {
+                char c = tc.getCharacter();
+                if (c == '\u0000') {
+                    str.append(' ');
+                } else {
+                    str.append(c);
+                }
+            } else {
+                str.append(' ');
+            }
+        }
+        return str.toString().trim();
     }
 }
