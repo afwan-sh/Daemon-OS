@@ -1,8 +1,13 @@
 package com.daemonos.bootSystem;
 
+import com.daemonos.terminalEmulator.Emulator;
+
 public class Boot {
-    public static void main(String[] args) throws Exception {
-        checkSystemFile check = new checkSystemFile();
-        IO.println(check.checkOS());
+    void main() {
+        Emulator ui = new Emulator();
+        SystemFile sf = new SystemFile(ui);
+        ui.openWindow();
+        ui.msg("Booting System");
+
     }
 }

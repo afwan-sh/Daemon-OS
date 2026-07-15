@@ -48,86 +48,99 @@ public class Emulator {
 
     }
 
-    public void print(String word) throws IOException {
-        for (int x = 0; x < word.length(); x++) {
-            screen.setCharacter(x + 1, y, new TextCharacter(word.charAt(x), green, black));
+    public void print(String word) {
+        try {
+            for (int x = 0; x < word.length(); x++) {
+                screen.setCharacter(x + 1, y, new TextCharacter(word.charAt(x), green, black));
+            }
+            screen.setCursorPosition(new TerminalPosition(x, y));
+            screen.refresh();
+        } catch (Exception e) {
+            // TODO: handle exception
         }
-        screen.setCursorPosition(new TerminalPosition(x, y));
-        screen.refresh();
+
     }
 
-    public void msg(String word) throws IOException {
-        screen.setCharacter(x, y, new TextCharacter('»', green, black));
-        print(word);
-        y++;
-        x = 0;
-        screen.setCursorPosition(new TerminalPosition(x, y));
-        screen.refresh();
+    public void msg(String word) {
+        try {
+            screen.setCharacter(x, y, new TextCharacter('»', green, black));
+            print(word);
+            y++;
+            x = 0;
+            screen.setCursorPosition(new TerminalPosition(x, y));
+            screen.refresh();
+        } catch (Exception e) {
+
+        }
     }
 
-    public String input(boolean multiLine, boolean isPassword, String prompt) throws IOException {
-        screen.setCharacter(x, y, new TextCharacter('«', green, black));
-        print(prompt + " :");
+    public String input(boolean multiLine, boolean isPassword, String prompt) {
         StringBuilder str = new StringBuilder();
-        int minX = x = prompt.length() + 3;
-        minY = y;
-        screen.setCursorPosition(new TerminalPosition(minX, minY));
-        screen.refresh();
-        while (true) {
-            KeyStroke st = screen.readInput();
-            if (st.getKeyType() == KeyType.Enter) {
-                if (multiLine) {
-                    if (st.isShiftDown()) {
-                        y++;
-                        x = 0;
-                        break;
+        try {
+            screen.setCharacter(x, y, new TextCharacter('«', green, black));
+            print(prompt + " :");
+            int minX = x = prompt.length() + 3;
+            minY = y;
+            screen.setCursorPosition(new TerminalPosition(minX, minY));
+            screen.refresh();
+            while (true) {
+                KeyStroke st = screen.readInput();
+                if (st.getKeyType() == KeyType.Enter) {
+                    if (multiLine) {
+                        if (st.isShiftDown()) {
+                            y++;
+                            x = 0;
+                            break;
+                        } else {
+                            y++;
+                            x = 0;
+                            screen.setCharacter(x, y, new TextCharacter('«', green, black));
+                            x++;
+                            str.append(st.getCharacter());
+                            screen.setCursorPosition(new TerminalPosition(x, y));
+                            screen.refresh();
+                        }
                     } else {
                         y++;
                         x = 0;
-                        screen.setCharacter(x, y, new TextCharacter('«', green, black));
-                        x++;
-                        str.append(st.getCharacter());
-                        screen.setCursorPosition(new TerminalPosition(x, y));
-                        screen.refresh();
+                        break;
                     }
-                } else {
-                    y++;
-                    x = 0;
-                    break;
-                }
 
-            } else if (st.getKeyType() == KeyType.Character) {
-                char c = st.getCharacter();
-                if (isPassword) {
-                    multiLine = false;
-                    screen.setCharacter(x, y, new TextCharacter('*', green, black));
-                } else {
-                    screen.setCharacter(x, y, new TextCharacter(st.getCharacter(), green, black));
-                }
-                x++;
-                screen.setCursorPosition(new TerminalPosition(x, y));
-                str.append(c);
-                screen.refresh();
-            } else if (st.getKeyType() == KeyType.Backspace) {
-                if (x > 1) {
-                    if (minX < x || minY < y) {
-                        x--;
-                        str.deleteCharAt(str.length() - 1);
-                        screen.setCharacter(x, y, new TextCharacter(' ', green, black));
-                        screen.setCursorPosition(new TerminalPosition(x, y));
-                        screen.refresh();
+                } else if (st.getKeyType() == KeyType.Character) {
+                    char c = st.getCharacter();
+                    if (isPassword) {
+                        multiLine = false;
+                        screen.setCharacter(x, y, new TextCharacter('*', green, black));
+                    } else {
+                        screen.setCharacter(x, y, new TextCharacter(st.getCharacter(), green, black));
                     }
-                } else if (x == 1 && y > 0) {
-                    if (minY < y) {
-                        screen.setCharacter(0, y, new TextCharacter(' ', green, black));
-                        y--;
-                        str.deleteCharAt(str.length() - 1);
-                        x = getStringLine(screen, y).length();
-                        screen.setCursorPosition(new TerminalPosition(x, y));
-                        screen.refresh();
+                    x++;
+                    screen.setCursorPosition(new TerminalPosition(x, y));
+                    str.append(c);
+                    screen.refresh();
+                } else if (st.getKeyType() == KeyType.Backspace) {
+                    if (x > 1) {
+                        if (minX < x || minY < y) {
+                            x--;
+                            str.deleteCharAt(str.length() - 1);
+                            screen.setCharacter(x, y, new TextCharacter(' ', green, black));
+                            screen.setCursorPosition(new TerminalPosition(x, y));
+                            screen.refresh();
+                        }
+                    } else if (x == 1 && y > 0) {
+                        if (minY < y) {
+                            screen.setCharacter(0, y, new TextCharacter(' ', green, black));
+                            y--;
+                            str.deleteCharAt(str.length() - 1);
+                            x = getStringLine(screen, y).length();
+                            screen.setCursorPosition(new TerminalPosition(x, y));
+                            screen.refresh();
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+
         }
         return str.toString();
     }
