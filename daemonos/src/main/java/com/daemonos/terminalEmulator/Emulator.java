@@ -163,4 +163,27 @@ public class Emulator {
         }
         return str.toString().trim();
     }
+    
+    	public void clear(){
+        try {
+            while(!(x==0&&y==0)){
+		    for(int i=y;i>=0;i--){
+                    x=screen.getTerminalSize().getColumns();
+                    for(int j=x;j>=0;j--){
+                        screen.setCursorPosition(new TerminalPosition(x, y));
+                        screen.setCharacter(x, y, new TextCharacter(' '));
+                        if(x!=0){
+                            x--;
+                        }
+                    }
+                    if(y!=0){
+                        y--;
+                    }
+                }
+            }
+            screen.refresh();    
+        } catch (Exception e) {
+        }
+        
+    }
 }

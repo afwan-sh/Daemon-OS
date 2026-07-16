@@ -8,6 +8,8 @@ public class Boot {
         SystemFile sf = new SystemFile(ui);
         ui.openWindow();
         ui.msg("Booting System");
+        ui.input(true, false," ");
+        ui.clear();
 
     }
 }
