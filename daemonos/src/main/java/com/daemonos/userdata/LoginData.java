@@ -11,9 +11,9 @@ public class LoginData {
         this.ui = ui;
     }
 
-    public String checkData() throws Exception {
-
-        if (user.isEmpty()) {
+    public String checkData() {
+        try {
+            if (user.isEmpty()) {
             ui.msg("Hello new user let make your account");
             String name = ui.input(false, false, "Enter your name");
             String pass = ui.input(false, true, "Enter your password");
@@ -31,7 +31,11 @@ public class LoginData {
             } else {
                 return "Wrong User name";
             }
+        }    
+        } catch (Exception e) {
+            return "An Unexpected Error Has Occurred";
         }
+        
     }
 
     public String getUser(String name) {

@@ -31,13 +31,13 @@ The goal is to gradually build a complete terminal environment from scratch.
 
 ### v0.1-alpha
 
-- [ ] Custom DaemonOS boot screen
+- [x] Custom DaemonOS boot screen
 - [x] User account creation
 - [x] Username & password login
 - [x] Password masking
 - [x] Terminal-first interface
 - [x] Custom input/output style (`<<` and `>>`)
-- [ ] Modular Java project structure
+- [x] Modular Java project structure
 
 ---
 

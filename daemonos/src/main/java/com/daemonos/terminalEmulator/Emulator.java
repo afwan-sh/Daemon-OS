@@ -13,7 +13,7 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import java.awt.Font;
 
-// symbol to use ¶‼∫␦█▓
+// symbol to use ¶ ‼ ∫ ␦ █ ▓
 public class Emulator {
     String user;
     Screen screen;
@@ -22,6 +22,7 @@ public class Emulator {
     int minY;
     TextColor black = TextColor.ANSI.BLACK;
     TextColor green = TextColor.ANSI.GREEN;
+    TextColor red = TextColor.ANSI.RED;
 
     public void openWindow() {
         try {
@@ -47,11 +48,40 @@ public class Emulator {
         }
 
     }
+    public void setChar(char c,int x){
+        screen.setCharacter(x,y, new TextCharacter(c));
+    }
+    public void setChar(char c,int x,TextColor fg){
+        screen.setCharacter(x,y, new TextCharacter(c,fg,black));
+    }
+        
+    public void bootPrint(String word,boolean done){
+        if(done){
+            setChar('<',0);
+            setChar('*',1,green);
+            setChar('>',2);
+        }else{
+            setChar('<',0);
+            setChar(' ',1);
+            setChar('>',2);
+        }
+        try{
+            for(int x=0;x<word.length();x++){
+                screen.setCharacter(x+3,y, new TextCharacter(word.charAt(x)));
+            }
+            y++;
+            screen.setCursorPosition(new TerminalPosition(x, y));
+            screen.refresh();
+            Thread.sleep(1000);
+        }catch(Exception e){
+
+        }
+    }
 
     public void print(String word) {
         try {
             for (int x = 0; x < word.length(); x++) {
-                screen.setCharacter(x + 1, y, new TextCharacter(word.charAt(x), green, black));
+                screen.setCharacter(x + 1, y, new TextCharacter(word.charAt(x),green,black));
             }
             screen.setCursorPosition(new TerminalPosition(x, y));
             screen.refresh();
@@ -163,27 +193,37 @@ public class Emulator {
         }
         return str.toString().trim();
     }
-    
-    	public void clear(){
+    public void clearl(){
+        y--;
+        for (x=screen.getTerminalSize().getColumns();x>=0;x--){
+            setChar(' ', x);
+        }
         try {
-            while(!(x==0&&y==0)){
-		    for(int i=y;i>=0;i--){
-                    x=screen.getTerminalSize().getColumns();
-                    for(int j=x;j>=0;j--){
-                        screen.setCursorPosition(new TerminalPosition(x, y));
-                        screen.setCharacter(x, y, new TextCharacter(' '));
-                        if(x!=0){
-                            x--;
-                        }
-                    }
-                    if(y!=0){
-                        y--;
-                    }
-                }
-            }
+            screen.setCursorPosition(new TerminalPosition(x, y));
             screen.refresh();    
         } catch (Exception e) {
+            // TODO: handle exception
         }
-        
+    }
+    public void clear(){
+    try {
+        while(!(x==0&&y==0)){
+        for(int i=y;i>=0;i--){
+                x=screen.getTerminalSize().getColumns();
+                for(int j=x;j>=0;j--){
+                    screen.setCursorPosition(new TerminalPosition(x, y));
+                    screen.setCharacter(x, y, new TextCharacter(' '));
+                    if(x!=0){
+                        x--;
+                    }
+                }
+                if(y!=0){
+                    y--;
+                }
+            }
+        }
+        screen.refresh();    
+    } catch (Exception e) {
+    }    
     }
 }

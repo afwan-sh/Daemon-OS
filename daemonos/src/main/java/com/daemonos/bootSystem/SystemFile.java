@@ -22,7 +22,6 @@ public class SystemFile {
 
     public void folder() {
         try {
-            ui.msg("");
             if (!Files.exists(folderP)) {
                 if (checkOS().contains("Window")) {
                     Files.createDirectories(folderP);
@@ -43,7 +42,7 @@ public class SystemFile {
                     Files.createFile(fileP);
                     hidden(fileP);
                 } else {
-                    Files.createDirectories(fileP);
+                    Files.createFile(fileP);
                 }
             }
         } catch (Exception e) {
