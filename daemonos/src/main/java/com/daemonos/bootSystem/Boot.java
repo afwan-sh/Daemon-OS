@@ -3,7 +3,7 @@ package com.daemonos.bootSystem;
 import com.daemonos.terminalEmulator.Emulator;
 
 public class Boot {
-    void main() {
+    public static void main(String args[]) {
         Emulator ui = new Emulator();
         SystemFile sf = new SystemFile(ui);
         ui.openWindow();

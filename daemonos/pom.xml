@@ -8,8 +8,8 @@
     <artifactId>daemonos</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
-        <maven.compiler.source>26</maven.compiler.source>
-        <maven.compiler.target>26</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
     </properties>
     <dependencies>
       <dependency>
@@ -23,6 +23,9 @@
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+                <mainClass>com.daemonos.bootSystem.Boot</mainClass>    
+            </configuration>
             <version>3.6.0</version>
         </plugin>
     </plugins>

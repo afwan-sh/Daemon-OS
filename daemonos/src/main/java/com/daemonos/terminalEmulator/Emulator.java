@@ -25,7 +25,7 @@ public class Emulator {
 
     public void openWindow() {
         try {
-            Font font = new Font("Cascadia Mono", Font.PLAIN, 14);
+            Font font = new Font("Monospaced", Font.PLAIN, 16);
             DefaultTerminalFactory factory = new DefaultTerminalFactory();
             factory.setTerminalEmulatorFontConfiguration(SwingTerminalFontConfiguration.newInstance(font));
             SwingTerminalFrame terminalFrame = factory.createSwingTerminal();
